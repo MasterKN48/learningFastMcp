@@ -1,0 +1,8 @@
+{
+  "Food": ["Grocery", "Restaurant", "Snacks", "Coffee"],
+  "Transport": ["Fuel", "Public Transit", "Uber/Taxi", "Maintenance"],
+  "Housing": ["Rent", "Electricity", "Water", "Internet", "Cleaning"],
+  "Entertainment": ["Movies", "Gaming", "Subscriptions", "Hobbies"],
+  "Health": ["Medicine", "Doctor", "Gym", "Insurance"],
+  "Shopping": ["Clothing", "Electronics", "Gifts", "Home Decor"]
+}
