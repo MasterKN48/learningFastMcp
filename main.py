@@ -1,16 +1,25 @@
 import json
 import sqlite3
 import os
+import tempfile
 from datetime import datetime
+from pathlib import Path
 from typing import List, Optional
 from fastmcp import FastMCP, Context
 
 # Initialize FastMCP Server
 mcp = FastMCP("Expense Tracker Pro")
 
-# Database Paths
-DB_PATH = "data/expenses.db"
-CATEGORIES_FILE = "data/categories.json"
+# --- Cloud Deployment Setup ---
+# Resolve the directory where the script is located
+BASE_DIR = Path(__file__).parent.resolve()
+CATEGORIES_FILE = BASE_DIR / "data" / "categories.json"
+
+# Use a temporary directory for the SQLite database if running in an ephemeral environment
+# This ensures we have write permissions in cloud environments like FastMCP Cloud
+TEMP_DB_DIR = Path(tempfile.gettempdir()) / "expense_tracker"
+TEMP_DB_DIR.mkdir(parents=True, exist_ok=True)
+DB_PATH = TEMP_DB_DIR / "expenses.db"
 
 
 def load_categories_config():
@@ -21,8 +30,7 @@ def load_categories_config():
 
 
 def init_db():
-    os.makedirs("data", exist_ok=True)
-    with sqlite3.connect(DB_PATH) as conn:
+    with sqlite3.connect(str(DB_PATH)) as conn:
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS expenses (
@@ -65,7 +73,7 @@ def add_expense(
     record_date = date or datetime.now().strftime("%Y-%m-%d")
 
     try:
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(str(DB_PATH)) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 "INSERT INTO expenses (amount, date, category, subcategory, note) VALUES (?, ?, ?, ?, ?)",
@@ -100,7 +108,7 @@ def list_expenses(
         limit: Number of records to return
     """
     try:
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(str(DB_PATH)) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
 
@@ -153,7 +161,7 @@ def get_summary(
         end_date: End date for summary (YYYY-MM-DD)
     """
     try:
-        with sqlite3.connect(DB_PATH) as conn:
+        with sqlite3.connect(str(DB_PATH)) as conn:
             cursor = conn.cursor()
 
             # Optimized Group By Query
@@ -235,7 +243,7 @@ def get_categories_and_subcategories() -> str:
 @mcp.resource("expenses://summary")
 def get_resource_summary() -> str:
     """Get a quick summary of total spend."""
-    with sqlite3.connect(DB_PATH) as conn:
+    with sqlite3.connect(str(DB_PATH)) as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT SUM(amount) FROM expenses")
         total = cursor.fetchone()[0] or 0
@@ -244,7 +252,10 @@ def get_resource_summary() -> str:
 
 def main():
     init_db()
-    mcp.run(transport="stdio")
+    # Support automatic transport detection for Cloud vs Local
+    # 'http' is the modern Streamable HTTP transport (successor to SSE)
+    transport = os.getenv("MCP_TRANSPORT", "stdio")
+    mcp.run(transport=transport)
 
 
 if __name__ == "__main__":

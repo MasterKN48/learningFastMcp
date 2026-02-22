@@ -193,6 +193,21 @@ While the official SDK is great for foundational work, **FastMCP** abstracts awa
 
 ---
 
+## ☁️ Cloud Deployment
+
+This MCP server is optimized for deployment on **FastMCP Cloud** (or similar ephemeral environments):
+
+1. **Storage**: Uses `tempfile` for the SQLite database to ensure write permissions in serverless environments.
+2. **Transport**: Uses **Streamable HTTP** (`http`), the modern successor to SSE in FastMCP 3.x. It automatically switches between `stdio` (local) and `http` (cloud) based on environment variables.
+3. **Category Config**: Uses absolute path resolution to find `categories.json` reliably.
+
+### Environment Variables
+
+- `MCP_TRANSPORT`: Set to `http` for cloud deployment, defaults to `stdio`.
+- `FAST_MCP_CLOUD`: (Optional) Can be used to trigger specific cloud behaviors.
+
+---
+
 ## 📈 Learning Progress
 
 - [x] Project initialized with `uv`.
