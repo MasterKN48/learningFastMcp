@@ -6,6 +6,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import List, Optional
 from fastmcp import FastMCP, Context
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Initialize FastMCP Server
 mcp = FastMCP("Expense Tracker Pro")
