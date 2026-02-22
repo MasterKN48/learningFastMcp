@@ -244,7 +244,7 @@ def get_resource_summary() -> str:
 
 def main():
     init_db()
-    mcp.run()
+    mcp.run(transport="stdio")
 
 
 if __name__ == "__main__":
