@@ -257,7 +257,6 @@ def get_resource_summary() -> str:
 def main():
     init_db()
     # Support automatic transport detection for Cloud vs Local
-    # 'http' is the modern Streamable HTTP transport (successor to SSE)
     transport = os.getenv("MCP_TRANSPORT", "stdio")
     mcp.run(transport=transport)
 
